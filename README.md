@@ -1,5 +1,7 @@
 # BrowserSessions
 
+Saves a HTML and CSV file of your Safari and Chrome tabs to a directory.
+
 You may need to `mkdir ~/Desktop/BrowserSessions`
 
 The code below shows what's in the app (you can unzip and then open it with Automator).
