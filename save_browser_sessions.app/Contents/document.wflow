@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMApplicationBuild</key>
+	<string>512</string>
+	<key>AMApplicationVersion</key>
+	<string>2.10</string>
+	<key>AMDocumentVersion</key>
+	<string>2</string>
+	<key>actions</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<true/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>1.0</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run JavaScript.action</string>
+				<key>ActionName</key>
+				<string>Run JavaScript</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>source</key>
+					<string>function run(input, parameters) {	// ==========================================================	var content = "";var line = "";var this_content = '';var delimeter = ',';line = 'browser_name' + delimeter + 'win_num' + delimeter + 'tab_num' + delimeter + 'tab_name' + delimeter + 'tab_url' + "\n";content = content + line;var outfile = "browser_pages.csv";var app = Application.currentApplication();app.includeStandardAdditions = true;function alert_to_textEdit(textfile, string) {	var textEdit = Application("TextEdit");	var newDoc = textEdit.Document().make();	newDoc.name = textfile;	textEdit.documents[textfile].text = string;}         function writeTextToFile(text, file, overwriteExistingContent) {	        try {                 // Convert the file to a string            var fileString = file.toString()                 // Open the file for writing            var openedFile = app.openForAccess(Path(fileString), { writePermission: true })                 // Clear the file if content should be overwritten            if (overwriteExistingContent) {                app.setEof(openedFile, { to: 0 })            }                 // Write the new content to the file            app.write(text, { to: openedFile, startingAt: app.getEof(openedFile) })                 // Close the file            app.closeAccess(openedFile)                 // Return a boolean indicating that writing was successful            return true        }        catch(error) {                 try {                // Close the file                app.closeAccess(file)            }            catch(error) {                // Report the error is closing failed                console.log(`Couldn't close file: ${error}`)            }                 // Return a boolean indicating that writing was successful            return false        }    }function alert(mesg) {	var app = Application.currentApplication();	app.includeStandardAdditions = true;	app.displayDialog(mesg);}function get_browser_pages(browser_name) {	var my_line = '';	var my_content = '';
+	var my_html_content = '';
+	var my_html_line = '';
+	var html_cell = `
+	&lt;tr&gt;
+      &lt;th scope="row"&gt;row_num&lt;/th&gt;
+      &lt;td&gt; browser_name &lt;/td&gt;
+      &lt;td&gt; win_num &lt;/td&gt;
+      &lt;td&gt; tab_num &lt;/td&gt;
+	  &lt;td&gt; &lt;a href='tab_url'&gt;tab_name&lt;/a&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+	`;	var this_browser = Application(browser_name);	var browser_nwin = this_browser.windows.length;
+	
+	var k = 0;	for (j = 0; j &lt; browser_nwin; j++) {        	var window = this_browser.windows[j];		var win_num = j;		var win_ntabs = window.tabs.length;	    	for (var i = 0; i &lt; win_ntabs; i++) {			var tab_name = window.tabs[i].name();			tab_name = tab_name.replace(',',' ');			var tab_num = i;			var tab_url = window.tabs[i].url();        	my_line = browser_name + delimeter + win_num + delimeter + tab_num + delimeter + tab_name + delimeter + tab_url + "\n";			my_content += my_line;
+			my_html_line = html_cell;
+			my_html_line = my_html_line.replace('row_num', k);
+			my_html_line = my_html_line.replace('browser_name', browser_name);
+			my_html_line = my_html_line.replace('win_num', win_num);
+			my_html_line = my_html_line.replace('tab_num', tab_num);
+			my_html_line = my_html_line.replace('tab_name', tab_name);
+			my_html_line = my_html_line.replace('tab_url', tab_url);
+			my_html_content += my_html_line;    	}
+		k += 1;	   }   return [my_content, my_html_content];}function get_sensible_date(){	var d = new Date();	var datestring = '';	datestring += d.getFullYear();	datestring += String(d.getMonth()).padStart(2, '0');	datestring += String(d.getDate()).padStart(2, '0');	datestring += '_';	datestring += String(d.getHours()).padStart(2, '0');	datestring += String(d.getMinutes()).padStart(2, '0');	datestring += String(d.getSeconds()).padStart(2, '0');	return datestring;}
+var this_html = '';
+var this_content = '';
+var html_body = '';
+var browser_name = 'Google Chrome';[this_content, this_html] = get_browser_pages(browser_name);content += this_content;
+html_body += this_html;var browser_name = 'Safari';[this_content, this_html] = get_browser_pages(browser_name);content += this_content;html_body += this_html;var dateString = get_sensible_date();//alert(dateString);var desktopString = app.pathTo("desktop").toString();var file = `${desktopString}/BrowserSessions/${dateString}.csv`writeTextToFile(content, file, true)
+
+
+var html_head = `
+
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;!-- Required meta tags --&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"&gt;
+
+    &lt;!-- Bootstrap CSS --&gt;
+    &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"&gt;
+
+    &lt;title&gt;Hello, world!&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+&lt;table class="table table-striped"&gt;
+  &lt;thead class="thead-dark"&gt;
+    &lt;tr&gt;
+      &lt;th scope="col"&gt;#&lt;/th&gt;
+      &lt;th scope="col"&gt;browser_name&lt;/th&gt;
+      &lt;th scope="col"&gt;win_num&lt;/th&gt;
+      &lt;th scope="col"&gt;tab_num&lt;/th&gt;
+	  &lt;th scope="col"&gt;Webpage&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+  `;
+
+var html_foot = `
+&lt;/tbody&gt;
+&lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+`;
+
+var html = html_head + html_body + html_foot;file = `${desktopString}/BrowserSessions/${dateString}.html`writeTextToFile(html, file, true)
+// ==========================================================	return input;}</string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.Automator.RunJavaScript</string>
+				<key>CFBundleVersion</key>
+				<string>1.0</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunJavaScriptAction</string>
+				<key>InputUUID</key>
+				<string>ECAD4DBA-A27A-48DB-AECC-B4C805FD3F2F</string>
+				<key>Keywords</key>
+				<array>
+					<string>Run</string>
+					<string>JavaScript</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>6EFDAB16-3EB0-40D4-8BC7-1E31303BB382</string>
+				<key>UUID</key>
+				<string>83DA211D-3746-4F3B-A909-946451B235ED</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<string>function run(input, parameters) {
+	
+	// Your script goes here
+
+	return input;
+}</string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>0</string>
+					</dict>
+				</dict>
+				<key>isViewVisible</key>
+				<integer>1</integer>
+				<key>location</key>
+				<string>665.000000:782.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run JavaScript.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>connectors</key>
+	<dict/>
+	<key>workflowMetaData</key>
+	<dict>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.application</string>
+	</dict>
+</dict>
+</plist>
